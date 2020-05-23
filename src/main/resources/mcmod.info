@@ -1,0 +1,16 @@
+[
+{
+  "modid": "neverbreak",
+  "name": "Never Break",
+  "description": "Never Break adds this sweet enchantment which you can add to your tools and armour which means that they will never break!!",
+  "version": "1.12-0.1.0",
+  "mcversion": "1.12.2",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["CJMinecraft01"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]

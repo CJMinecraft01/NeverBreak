@@ -1,20 +1,21 @@
 package cjminecraft.neverbreak;
 
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Mod(NeverBreak.MODID)
+@Mod(name = NeverBreak.NAME, version = NeverBreak.VERSION, modid = NeverBreak.MODID, acceptedMinecraftVersions = NeverBreak.ACCEPTED_MC_VERSIONS, certificateFingerprint = NeverBreak.CERTIFICATE_FINGERPRINT)
 public class NeverBreak {
     public static final String MODID = "neverbreak";
-    public static final Logger LOGGER = LogManager.getFormatterLogger(MODID);
 
-    public static NeverBreakEnchantment NEVER_BREAK;
+    public static final String NAME = "Never Break";
 
-    public NeverBreak() {
-        ForgeRegistries.ENCHANTMENTS.register(NEVER_BREAK = new NeverBreakEnchantment());
-    }
+    public static final String VERSION = "${version}";
 
+    public static final String ACCEPTED_MC_VERSIONS = "[1.12,1.12.2]";
 
+    public static final String CERTIFICATE_FINGERPRINT = "${fingerprint}";
+
+    public static final Logger LOGGER = LogManager.getFormatterLogger("neverbreak");
 }
+
