@@ -32,6 +32,8 @@ public class Events {
 
     @SubscribeEvent
     public static void onItemDestroy(PlayerDestroyItemEvent event) {
+        if (event.getOriginal() == null)
+            return;
         if (!event.getPlayer().isCreative() && hasNeverBreakEnchantment(event.getOriginal())) {
             ItemStack stack = event.getOriginal();
             stack.setDamage(stack.getMaxDamage());
