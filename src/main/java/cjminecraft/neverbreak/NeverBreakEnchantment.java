@@ -7,7 +7,7 @@ import net.minecraft.util.ResourceLocation;
 
 public class NeverBreakEnchantment extends Enchantment {
     public NeverBreakEnchantment() {
-        super(Rarity.VERY_RARE, EnchantmentType.ALL, EquipmentSlotType.values());
+        super(Rarity.VERY_RARE, NeverBreak.ALL, EquipmentSlotType.values());
         this.setRegistryName(new ResourceLocation(NeverBreak.MODID, "never_break"));
     }
 

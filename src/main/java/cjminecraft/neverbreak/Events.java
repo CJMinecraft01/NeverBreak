@@ -129,7 +129,7 @@ public class Events {
                                     int finalI = i;
                                     stack.damageItem((int) damage, player, p -> p.sendBreakAnimation(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR, finalI)));
                                     totalArmourValue += ((ArmorItem) stack.getItem()).getDamageReduceAmount();
-                                    totalArmourToughness += ((ArmorItem) stack.getItem()).getToughness();
+                                    totalArmourToughness += ((ArmorItem) stack.getItem()).func_234657_f_();
                                     armourList.add(stack);
                                 }
                             }
