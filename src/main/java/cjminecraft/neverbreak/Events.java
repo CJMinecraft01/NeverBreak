@@ -20,6 +20,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -132,6 +133,29 @@ public class Events {
                                     totalArmourToughness += ((ArmorItem) stack.getItem()).getToughness();
                                     armourList.add(stack);
                                 }
+                            }
+                        }
+                    }
+                }
+                damageAmount = CombatRules.getDamageAfterAbsorb(damageAmount, totalArmourValue, totalArmourToughness);
+            } else {
+                Iterator<ItemStack> iterator = entity.getArmorInventoryList().iterator();
+                float totalArmourValue = 0.0F;
+                float totalArmourToughness = 0.0F;
+                if (damageAmount > 0) {
+                    float damage = damageAmount / 4.0F;
+                    if (damage < 1.0F)
+                        damage = 1.0F;
+
+                    for (int i = 0; iterator.hasNext(); i++) {
+                        ItemStack stack = iterator.next();
+                        if (stack.getItem() instanceof ArmorItem) {
+                            if (!hasNeverBreakEnchantment(stack) || stack.getDamage() < stack.getMaxDamage() - damage) {
+                                int finalI = i;
+                                stack.damageItem((int) damage, entity, p -> p.sendBreakAnimation(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR, finalI)));
+                                totalArmourValue += ((ArmorItem) stack.getItem()).getDamageReduceAmount();
+                                totalArmourToughness += ((ArmorItem) stack.getItem()).getToughness();
+                                armourList.add(stack);
                             }
                         }
                     }
