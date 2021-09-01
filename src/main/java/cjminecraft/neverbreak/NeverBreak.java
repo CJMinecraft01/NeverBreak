@@ -20,7 +20,7 @@ public class NeverBreak {
     public NeverBreak() {
         ALL = EnchantmentType.create("ALL", item -> {
             for (EnchantmentType type : EnchantmentType.values())
-                if (type != ALL && type.canEnchantItem(item))
+                if (type != ALL && type.canEnchant(item))
                     return true;
             return false;
         });
