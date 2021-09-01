@@ -1,19 +1,25 @@
 package cjminecraft.neverbreak;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ShieldItem;
 import net.minecraft.potion.Effects;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.CombatRules;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.Hand;
+import net.minecraft.util.*;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.*;
 import net.minecraftforge.event.world.BlockEvent;
@@ -39,11 +45,12 @@ public class Events {
     @SubscribeEvent
     public static void onItemDestroy(PlayerDestroyItemEvent event) {
         if (!event.getPlayer().isCreative() && hasNeverBreakEnchantment(event.getOriginal())) {
-            ItemStack stack = event.getOriginal();
-            stack.setDamageValue(stack.getMaxDamage());
-            if (event.getHand() != null)
+            ItemStack stack = event.getOriginal().copy();
+            stack.setDamageValue(stack.getMaxDamage() - 1);
+            // todo shield will still break
+            if (event.getHand() != null) {
                 event.getPlayer().setItemInHand(event.getHand(), stack);
-            else {
+            } else {
                 event.setCanceled(true);
                 if (event.getPlayer().getMainHandItem() == ItemStack.EMPTY)
                     event.getPlayer().setItemInHand(Hand.MAIN_HAND, stack);
@@ -94,15 +101,25 @@ public class Events {
 
     @SubscribeEvent
     public static void onRightClickItem(PlayerInteractEvent.RightClickItem event) {
-        if (!event.getPlayer().isCreative() && shouldApplyNeverBreak(event.getItemStack()) && !(event.getItemStack().getItem() instanceof ArmorItem))
+        if (!event.getPlayer().isCreative() && shouldApplyNeverBreak(event.getItemStack()) && !(event.getItemStack().getItem() instanceof ArmorItem)) {
+            if (event.getItemStack().getItem() instanceof ShieldItem) {
+                event.getPlayer().getCooldowns().addCooldown(event.getPlayer().getUseItem().getItem(), 100);
+                event.getPlayer().stopUsingItem();
+            }
             event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onLivingAttack(LivingAttackEvent event) {
+        LivingEntity entity = event.getEntityLiving();
+        if (entity.isUsingItem() && !entity.getUseItem().isEmpty());
     }
 
     @SubscribeEvent
     public static void onLivingHurt(LivingHurtEvent event) {
         if (event.getEntityLiving() instanceof PlayerEntity && ((PlayerEntity) event.getEntityLiving()).isCreative())
             return;
-        // check if the player is blocking
 
         AtomicBoolean hasNeverBreakEnchant = new AtomicBoolean(false);
         event.getEntityLiving().getArmorSlots().forEach(stack -> {
