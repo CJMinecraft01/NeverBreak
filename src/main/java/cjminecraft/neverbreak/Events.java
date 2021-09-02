@@ -1,25 +1,20 @@
 package cjminecraft.neverbreak;
 
-import com.google.common.collect.ImmutableList;
-import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ArmorItem;
+import net.minecraft.item.FishingRodItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ShieldItem;
 import net.minecraft.potion.Effects;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.*;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraft.util.CombatRules;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.Hand;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.*;
 import net.minecraftforge.event.world.BlockEvent;
@@ -39,7 +34,7 @@ public class Events {
     }
 
     public static boolean shouldApplyNeverBreak(ItemStack stack) {
-        return hasNeverBreakEnchantment(stack) && stack.getDamageValue() >= stack.getMaxDamage() - 1;
+        return hasNeverBreakEnchantment(stack) && stack.getDamageValue() >= stack.getMaxDamage() - (stack.getItem() instanceof FishingRodItem ? 2 : 1);
     }
 
     @SubscribeEvent
@@ -47,7 +42,6 @@ public class Events {
         if (!event.getPlayer().isCreative() && hasNeverBreakEnchantment(event.getOriginal())) {
             ItemStack stack = event.getOriginal().copy();
             stack.setDamageValue(stack.getMaxDamage() - 1);
-            // todo shield will still break
             if (event.getHand() != null) {
                 event.getPlayer().setItemInHand(event.getHand(), stack);
             } else {
@@ -86,8 +80,7 @@ public class Events {
 
     @SubscribeEvent
     public static void onItemFished(ItemFishedEvent event) {
-        // todo test (was -2 not -1)
-        if (!event.getPlayer().isCreative() && shouldApplyNeverBreak(event.getPlayer().getMainHandItem())) {
+        if (!event.getPlayer().isCreative() && hasNeverBreakEnchantment(event.getPlayer().getMainHandItem()) && event.getPlayer().getMainHandItem().getDamageValue() >= event.getPlayer().getMainHandItem().getMaxDamage() - 2) {
             event.damageRodBy(0);
             event.setCanceled(true);
         }
@@ -108,12 +101,6 @@ public class Events {
             }
             event.setCanceled(true);
         }
-    }
-
-    @SubscribeEvent
-    public static void onLivingAttack(LivingAttackEvent event) {
-        LivingEntity entity = event.getEntityLiving();
-        if (entity.isUsingItem() && !entity.getUseItem().isEmpty());
     }
 
     @SubscribeEvent
@@ -152,7 +139,7 @@ public class Events {
                         PlayerInventory inventory = player.inventory;
                         for (int i = 0; i < inventory.armor.size(); ++i) {
                             ItemStack stack = inventory.armor.get(i);
-                            if (stack.getItem() instanceof ArmorItem) {
+                            if ((!source.isFire() || !stack.getItem().isFireResistant()) && stack.getItem() instanceof ArmorItem) {
                                 if (!hasNeverBreakEnchantment(stack) || stack.getDamageValue() < stack.getMaxDamage() - damage) {
                                     int finalI = i;
                                     stack.hurtAndBreak((int) damage, player, p -> p.broadcastBreakEvent(EquipmentSlotType.byTypeAndIndex(EquipmentSlotType.Group.ARMOR, finalI)));
